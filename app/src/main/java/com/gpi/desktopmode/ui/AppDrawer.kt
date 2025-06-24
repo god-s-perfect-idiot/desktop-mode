@@ -64,9 +64,9 @@ fun AppDrawer(
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.55f))
                 .clickable { onDismiss() }
         ) {
-            BlurredWallpaperBackground(overlayColor = Color.Black.copy(alpha = 0.55f))
             // App Drawer Content
             Box(
                 modifier = Modifier
@@ -211,18 +211,18 @@ private fun AppsGrid(searchQuery: String) {
     
     val paddedPageApps = pageApps + List(appsPerPage - pageApps.size) { null }
     
-    Column {
+    Column(modifier = Modifier.fillMaxSize()) {
         LazyVerticalGrid(
             columns = GridCells.Fixed(columnsPerPage),
             horizontalArrangement = Arrangement.spacedBy(32.dp),
             verticalArrangement = Arrangement.spacedBy(32.dp),
-            modifier = Modifier.fillMaxWidth().height((rowsPerPage * 100).dp)
+            modifier = Modifier.fillMaxWidth().weight(1f)
         ) {
             items(paddedPageApps) { app ->
                 if (app != null) {
                     AppGridItem(app = app)
                 } else {
-                    Spacer(modifier = Modifier.size(72.dp))
+                    Spacer(modifier = Modifier.size(94.dp))
                 }
             }
         }
