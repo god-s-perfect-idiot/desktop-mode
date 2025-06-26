@@ -9,12 +9,20 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -35,6 +43,7 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
@@ -44,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.gpi.desktopmode.DockApp
 import com.gpi.desktopmode.toBitmap
+import kotlin.math.abs
 
 @Composable
 fun AppDrawer(
@@ -66,7 +76,10 @@ fun AppDrawer(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .clickable { onDismiss() }
+                .clickable(
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() }
+                ) { onDismiss() }
         ) {
             // Blurred bg.jpg as background
             val context = LocalContext.current
@@ -232,19 +245,93 @@ private fun AppsGrid(searchQuery: String) {
     val paddedPageApps = pageApps + List(appsPerPage - pageApps.size) { null }
     
     Column(modifier = Modifier.fillMaxSize()) {
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(columnsPerPage),
-            horizontalArrangement = Arrangement.spacedBy(32.dp),
-            verticalArrangement = Arrangement.spacedBy(32.dp),
-            modifier = Modifier.fillMaxWidth().weight(1f)
+        var gestureActive by remember { mutableStateOf(false) }
+        
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
         ) {
-            items(paddedPageApps) { app ->
-                if (app != null) {
-                    AppGridItem(app = app)
-                } else {
-                    Spacer(modifier = Modifier.size(94.dp))
+            AnimatedContent(
+                targetState = currentPage,
+                transitionSpec = {
+                    val direction = if (targetState > initialState) 1 else -1
+                    ContentTransform(
+                        targetContentEnter = slideInHorizontally(
+                            animationSpec = tween(300),
+                            initialOffsetX = { fullWidth -> direction * fullWidth }
+                        ) + fadeIn(animationSpec = tween(300)),
+                        initialContentExit = slideOutHorizontally(
+                            animationSpec = tween(300),
+                            targetOffsetX = { fullWidth -> -direction * fullWidth }
+                        ) + fadeOut(animationSpec = tween(300))
+                    )
+                }
+            ) { page ->
+                val pageAppsForCurrentPage = apps.drop(page * appsPerPage).take(appsPerPage)
+                val paddedPageAppsForCurrentPage = pageAppsForCurrentPage + List(appsPerPage - pageAppsForCurrentPage.size) { null }
+                
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(columnsPerPage),
+                    horizontalArrangement = Arrangement.spacedBy(32.dp),
+                    verticalArrangement = Arrangement.spacedBy(32.dp),
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    items(paddedPageAppsForCurrentPage) { app ->
+                        if (app != null) {
+                            AppGridItem(app = app)
+                        } else {
+                            Spacer(modifier = Modifier.size(94.dp))
+                        }
+                    }
                 }
             }
+            
+            // Overlay for gesture detection
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .pointerInput(Unit) {
+                        detectDragGestures(
+                            onDragStart = { gestureActive = false },
+                            onDragEnd = { gestureActive = false },
+                            onDragCancel = { gestureActive = false },
+                            onDrag = { change, dragAmount ->
+                                change.consume()
+                                val (x, y) = dragAmount
+                                
+                                // Only respond if gesture is not already active
+                                if (!gestureActive) {
+                                    val absX = abs(x)
+                                    val absY = abs(y)
+                                    
+                                    // Determine if this is primarily a horizontal or vertical gesture
+                                    if (absX > absY && absX > 8f) {
+                                        // Horizontal gesture
+                                        gestureActive = true
+                                        if (x < 0 && currentPage < pageCount - 1) {
+                                            // Swipe left - go to next page
+                                            currentPage++
+                                        } else if (x > 0 && currentPage > 0) {
+                                            // Swipe right - go to previous page
+                                            currentPage--
+                                        }
+                                    } else if (absY > absX && absY > 12f) {
+                                        // Vertical gesture
+                                        gestureActive = true
+                                        if (y < 0 && currentPage > 0) {
+                                            // Swipe up - go to previous page
+                                            currentPage--
+                                        } else if (y > 0 && currentPage < pageCount - 1) {
+                                            // Swipe down - go to next page
+                                            currentPage++
+                                        }
+                                    }
+                                }
+                            }
+                        )
+                    }
+            )
         }
         Spacer(modifier = Modifier.height(8.dp))
         PageIndicators(
