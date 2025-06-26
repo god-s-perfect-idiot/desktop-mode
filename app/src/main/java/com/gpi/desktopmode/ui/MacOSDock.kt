@@ -18,6 +18,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.gpi.desktopmode.DockApp
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.res.painterResource
+import androidx.compose.foundation.Image
+import androidx.compose.ui.graphics.asImageBitmap
 
 @Composable
 fun MacOSDock(
@@ -237,59 +247,50 @@ fun MacOSDock(
         contentAlignment = Alignment.BottomCenter
     ) {
         // Dock background with glass effect
-        Card(
+        Box(
             modifier = Modifier
                 .height(70.dp)
-                .wrapContentWidth(),
-            colors = CardDefaults.cardColors(
-                containerColor = Color.Black.copy(alpha = 0.3f)
-            ),
-            shape = RoundedCornerShape(20.dp)
+                .wrapContentWidth()
+                .padding(horizontal = 8.dp)
         ) {
+            // No background image, just a frosted overlay
             Box(
                 modifier = Modifier
-                    .background(
-                        Brush.radialGradient(
-                            colors = listOf(
-                                Color.White.copy(alpha = 0.2f),
-                                Color.White.copy(alpha = 0.1f),
-                                Color.White.copy(alpha = 0.05f)
-                            )
-                        )
-                    )
+                    .matchParentSize()
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(Color.White.copy(alpha = 0.20f))
+            )
+            // Dock icons
+            Row(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .wrapContentWidth()
+                    .padding(horizontal = horizontalPadding),
+                horizontalArrangement = Arrangement.spacedBy(spacing),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                // Dock icons
-                Row(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .wrapContentWidth()
-                        .padding(horizontal = horizontalPadding),
-                    horizontalArrangement = Arrangement.spacedBy(spacing),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    allDockApps.forEachIndexed { index, app ->
-                        if (app.packageName == "" && app.label == "separator") {
-                            // Dash separator
-                            Box(
-                                modifier = Modifier
-                                    .size(2.dp, 45.dp)
-                                    .background(
-                                        Color.White.copy(alpha = 0.3f),
-                                        RoundedCornerShape(1.dp)
-                                    )
-                            )
-                        } else {
-                            DockIcon(
-                                app = app,
-                                onClick = app.onClick,
-                                index = index,
-                                hoveredIndex = hoveredIndex,
-                                onHoverChanged = { isHovered ->
-                                    hoveredIndex = if (isHovered) index else -1
-                                    isDockHovered = isHovered
-                                }
-                            )
-                        }
+                allDockApps.forEachIndexed { index, app ->
+                    if (app.packageName == "" && app.label == "separator") {
+                        // Dash separator
+                        Box(
+                            modifier = Modifier
+                                .size(2.dp, 45.dp)
+                                .background(
+                                    Color.White.copy(alpha = 0.3f),
+                                    RoundedCornerShape(1.dp)
+                                )
+                        )
+                    } else {
+                        DockIcon(
+                            app = app,
+                            onClick = app.onClick,
+                            index = index,
+                            hoveredIndex = hoveredIndex,
+                            onHoverChanged = { isHovered ->
+                                hoveredIndex = if (isHovered) index else -1
+                                isDockHovered = isHovered
+                            }
+                        )
                     }
                 }
             }

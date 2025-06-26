@@ -13,7 +13,9 @@ fun MacOSDesktopScreen() {
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
-        BlurredWallpaperBackground()
+        // Use the actual wallpaper as background (not blurred)
+        WallpaperBackground()
+        
         // macOS Top Bar at the top
         Box(
             modifier = Modifier.align(Alignment.TopCenter)

@@ -31,9 +31,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -64,9 +66,27 @@ fun AppDrawer(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.55f))
                 .clickable { onDismiss() }
         ) {
+            // Blurred bg.jpg as background
+            val context = LocalContext.current
+            val backgroundBitmap = remember { getLocalBackgroundBitmap(context) }
+            if (backgroundBitmap != null) {
+                Image(
+                    bitmap = backgroundBitmap.asImageBitmap(),
+                    contentDescription = "AppDrawer Background",
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .blur(40.dp),
+                    contentScale = ContentScale.Crop
+                )
+            }
+            // Overlay for better readability
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.35f))
+            )
             // App Drawer Content
             Box(
                 modifier = Modifier
