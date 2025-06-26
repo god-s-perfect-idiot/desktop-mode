@@ -12,6 +12,7 @@ import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Apps
@@ -120,6 +121,31 @@ fun DockIcon(
                 modifier = Modifier.size(48.dp),
                 tint = Color.White
             )
+        }
+        
+        // Running indicator - small glowing dot at the bottom
+        if (app.isRunning) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .offset(y = 8.dp)
+                    .size(8.dp)
+                    .background(
+                        Color.White.copy(alpha = 0.9f),
+                        CircleShape
+                    )
+            ) {
+                // Add a subtle glow effect
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .background(
+                            Color.White.copy(alpha = 0.3f),
+                            CircleShape
+                        )
+                        .offset(1.dp, 1.dp)
+                )
+            }
         }
     }
 } 

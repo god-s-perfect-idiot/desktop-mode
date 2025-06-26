@@ -42,6 +42,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
@@ -64,14 +65,8 @@ fun AppDrawer(
     
     AnimatedVisibility(
         visible = isVisible,
-        enter = fadeIn(animationSpec = tween(300)) + slideInVertically(
-            animationSpec = tween(300),
-            initialOffsetY = { it }
-        ),
-        exit = fadeOut(animationSpec = tween(300)) + slideOutVertically(
-            animationSpec = tween(300),
-            targetOffsetY = { it }
-        )
+        enter = fadeIn(animationSpec = tween(800)),
+        exit = fadeOut(animationSpec = tween(800))
     ) {
         Box(
             modifier = Modifier
@@ -142,46 +137,56 @@ private fun SearchBar(
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = Color.White.copy(alpha = 0.8f)
+            containerColor = Color.Transparent
         ),
         shape = RoundedCornerShape(6.dp)
     ) {
-        Row(
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 12.dp, end = 12.dp, top = 4.dp, bottom = 4.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .background(
+                    Color.White.copy(alpha = 0.15f),
+                    RoundedCornerShape(6.dp)
+                )
         ) {
-            Icon(
-                imageVector = Icons.Default.Search,
-                contentDescription = "Search",
-                tint = Color.Gray,
-                modifier = Modifier.size(20.dp)
-            )
-            
-            Spacer(modifier = Modifier.width(12.dp))
-            
-            BasicTextField(
-                value = searchQuery,
-                onValueChange = onSearchQueryChange,
-                textStyle = TextStyle(
-                    fontSize = 12.sp,
-                    color = Color.Black,
-                    fontWeight = FontWeight.Normal
-                ),
-                modifier = Modifier.fillMaxWidth(),
-                decorationBox = { innerTextField ->
-                    if (searchQuery.isEmpty()) {
-                        Text(
-                            text = "Search apps...",
-                            fontSize = 12.sp,
-                            color = Color.Gray,
-                            fontWeight = FontWeight.Normal
-                        )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 12.dp, end = 12.dp, top = 4.dp, bottom = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = "Search",
+                    tint = Color.White.copy(alpha = 0.9f),
+                    modifier = Modifier.size(20.dp)
+                )
+                
+                Spacer(modifier = Modifier.width(12.dp))
+                
+                BasicTextField(
+                    value = searchQuery,
+                    onValueChange = onSearchQueryChange,
+                    textStyle = TextStyle(
+                        fontSize = 12.sp,
+                        color = Color.White.copy(alpha = 0.9f),
+                        fontWeight = FontWeight.Normal
+                    ),
+                    cursorBrush = SolidColor(Color.White),
+                    modifier = Modifier.fillMaxWidth(),
+                    decorationBox = { innerTextField ->
+                        if (searchQuery.isEmpty()) {
+                            Text(
+                                text = "Search apps...",
+                                fontSize = 12.sp,
+                                color = Color.White.copy(alpha = 0.6f),
+                                fontWeight = FontWeight.Normal
+                            )
+                        }
+                        innerTextField()
                     }
-                    innerTextField()
-                }
-            )
+                )
+            }
         }
     }
 }
@@ -258,13 +263,13 @@ private fun AppsGrid(searchQuery: String) {
                     val direction = if (targetState > initialState) 1 else -1
                     ContentTransform(
                         targetContentEnter = slideInHorizontally(
-                            animationSpec = tween(300),
+                            animationSpec = tween(600),
                             initialOffsetX = { fullWidth -> direction * fullWidth }
-                        ) + fadeIn(animationSpec = tween(300)),
+                        ) + fadeIn(animationSpec = tween(600)),
                         initialContentExit = slideOutHorizontally(
-                            animationSpec = tween(300),
+                            animationSpec = tween(600),
                             targetOffsetX = { fullWidth -> -direction * fullWidth }
-                        ) + fadeOut(animationSpec = tween(300))
+                        ) + fadeOut(animationSpec = tween(600))
                     )
                 }
             ) { page ->

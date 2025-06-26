@@ -9,7 +9,8 @@ data class DockApp(
     val label: String,
     val icon: Drawable?,
     val onClick: () -> Unit,
-    val isRecent: Boolean = false
+    val isRecent: Boolean = false,
+    val isRunning: Boolean = false
 )
 
 fun Drawable.toBitmap(): Bitmap {

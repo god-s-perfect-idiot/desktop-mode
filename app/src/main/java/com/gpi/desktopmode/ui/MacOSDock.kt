@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.gpi.desktopmode.DockApp
+import com.gpi.desktopmode.RunningAppsManager
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.layout.ContentScale
@@ -31,6 +32,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import android.util.Log
 
 @Composable
 fun MacOSDock(
@@ -92,26 +94,6 @@ fun MacOSDock(
                 onClick = { /* TODO */ }
             ),
             DockApp(
-                packageName = "com.facebook.katana",
-                label = "Facebook",
-                icon = try {
-                    packageManager.getApplicationIcon("com.facebook.katana")
-                } catch (e: Exception) {
-                    null
-                },
-                onClick = { /* TODO */ }
-            ),
-            DockApp(
-                packageName = "com.instagram.android",
-                label = "Instagram",
-                icon = try {
-                    packageManager.getApplicationIcon("com.instagram.android")
-                } catch (e: Exception) {
-                    null
-                },
-                onClick = { /* TODO */ }
-            ),
-            DockApp(
                 packageName = "com.google.android.youtube",
                 label = "YouTube",
                 icon = try {
@@ -126,16 +108,6 @@ fun MacOSDock(
                 label = "Gmail",
                 icon = try {
                     packageManager.getApplicationIcon("com.google.android.gm")
-                } catch (e: Exception) {
-                    null
-                },
-                onClick = { /* TODO */ }
-            ),
-            DockApp(
-                packageName = "com.google.android.apps.maps",
-                label = "Maps",
-                icon = try {
-                    packageManager.getApplicationIcon("com.google.android.apps.maps")
                 } catch (e: Exception) {
                     null
                 },
@@ -161,66 +133,52 @@ fun MacOSDock(
                 },
                 onClick = { /* TODO */ }
             ),
-            DockApp(
-                packageName = "com.google.android.apps.photos",
-                label = "Photos",
-                icon = try {
-                    packageManager.getApplicationIcon("com.google.android.apps.photos")
-                } catch (e: Exception) {
-                    null
-                },
-                onClick = { /* TODO */ }
-            )
         )
     }
     
-    val recentApps = remember {
+    // Refresh running apps periodically
+    var refreshTrigger by remember { mutableStateOf(0) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            kotlinx.coroutines.delay(5000) // Refresh every 5 seconds
+            refreshTrigger++
+        }
+    }
+    
+    val updatedRunningApps = remember(refreshTrigger) {
         try {
-            // Get all installed apps and pick some random ones as "recent"
-            val installedApps = packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
+            val runningAppPackages = RunningAppsManager.getRunningApps(context)
+            Log.d("MacOSDock", "Got ${runningAppPackages.size} running app packages: ${runningAppPackages.joinToString()}")
             
-            // Filter out system apps and our own app
-            val userApps = installedApps.filter { app ->
-                app.flags and android.content.pm.ApplicationInfo.FLAG_SYSTEM == 0 &&
-                app.packageName != "com.gpi.desktopmode" &&
-                !pinnedApps.any { it.packageName == app.packageName }
-            }
-            
-            // Take a few random apps as "recent"
-            userApps.take(3).mapNotNull { app ->
-                try {
-                    android.util.Log.d("DockDebug", "Adding recent app: ${app.packageName}")
-                    DockApp(
-                        packageName = app.packageName,
-                        label = app.loadLabel(packageManager).toString(),
-                        icon = app.loadIcon(packageManager),
-                        onClick = { 
-                            // Launch the app
-                            val intent = packageManager.getLaunchIntentForPackage(app.packageName)
-                            intent?.let {
-                                it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                context.startActivity(it)
-                            }
-                        },
-                        isRecent = true
-                    )
-                } catch (e: Exception) {
-                    android.util.Log.e("DockDebug", "Error loading app ${app.packageName}: ${e.message}")
+            val dockApps = runningAppPackages.mapNotNull { packageName ->
+                // Filter out our own app only
+                if (packageName != "com.gpi.desktopmode") {
+                    val dockApp = RunningAppsManager.createRunningAppDockApp(packageName, context)
+                    Log.d("MacOSDock", "Created dock app for $packageName: ${dockApp != null}")
+                    dockApp
+                } else {
+                    Log.d("MacOSDock", "Filtered out $packageName (our app)")
                     null
                 }
             }
+            
+            Log.d("MacOSDock", "Final running apps for dock: ${dockApps.size}")
+            dockApps
         } catch (e: Exception) {
-            android.util.Log.e("DockDebug", "Error getting installed apps: ${e.message}")
+            android.util.Log.e("MacOSDock", "Error getting running apps: ${e.message}")
             emptyList()
         }
     }
     
-    val allDockApps = remember(pinnedApps, recentApps) {
-        if (recentApps.isNotEmpty()) {
-            pinnedApps + listOf(DockApp("", "separator", null, { }, true)) + recentApps
-        } else {
-            pinnedApps
+    val allDockApps = remember(pinnedApps, updatedRunningApps) {
+        val apps = mutableListOf<DockApp>()
+        apps.addAll(pinnedApps)
+        if (updatedRunningApps.isNotEmpty()) {
+            apps.add(DockApp("", "separator", null, { }, true))
+            apps.addAll(updatedRunningApps)
         }
+        Log.d("MacOSDock", "Total dock apps: ${apps.size} (pinned: ${pinnedApps.size}, running: ${updatedRunningApps.size})")
+        apps
     }
     
     var hoveredIndex by remember { mutableStateOf(-1) }
