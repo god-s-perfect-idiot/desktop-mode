@@ -28,6 +28,9 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.Image
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 
 @Composable
 fun MacOSDock(
@@ -223,6 +226,10 @@ fun MacOSDock(
     var hoveredIndex by remember { mutableStateOf(-1) }
     var isDockHovered by remember { mutableStateOf(false) }
     
+    // Add hover detection for the entire dock
+    val dockInteractionSource = remember { MutableInteractionSource() }
+    val isDockAreaHovered by dockInteractionSource.collectIsHoveredAsState()
+    
     // Calculate dynamic spacing and width based on hover state
     val baseSpacing = 8.dp
     val hoveredSpacing = 20.dp
@@ -234,11 +241,47 @@ fun MacOSDock(
     
     val basePadding = 8.dp
     val hoveredPadding = 24.dp
-    val horizontalPadding by animateDpAsState(
-        targetValue = if (isDockHovered) hoveredPadding else basePadding,
+    
+    // Calculate asymmetric padding based on hovered icon position
+    val totalIcons = allDockApps.size
+    val leftPadding by animateDpAsState(
+        targetValue = if (isDockHovered && hoveredIndex >= 0) {
+            val hoveredIconPosition = hoveredIndex.toFloat() / (totalIcons - 1)
+            if (hoveredIconPosition <= 0.5f) {
+                // Icon is in left half, expand more to the left
+                basePadding + (hoveredPadding - basePadding) * (1f - hoveredIconPosition * 2f)
+            } else {
+                // Icon is in right half, expand less to the left
+                basePadding
+            }
+        } else {
+            basePadding
+        },
         animationSpec = tween(durationMillis = 300),
-        label = "padding"
+        label = "leftPadding"
     )
+    
+    val rightPadding by animateDpAsState(
+        targetValue = if (isDockHovered && hoveredIndex >= 0) {
+            val hoveredIconPosition = hoveredIndex.toFloat() / (totalIcons - 1)
+            if (hoveredIconPosition >= 0.5f) {
+                // Icon is in right half, expand more to the right
+                basePadding + (hoveredPadding - basePadding) * (hoveredIconPosition * 2f - 1f)
+            } else {
+                // Icon is in left half, expand less to the right
+                basePadding
+            }
+        } else {
+            basePadding
+        },
+        animationSpec = tween(durationMillis = 300),
+        label = "rightPadding"
+    )
+    
+    // Update dock hover state based on dock area hover
+    LaunchedEffect(isDockAreaHovered) {
+        isDockHovered = isDockAreaHovered
+    }
     
     Box(
         modifier = Modifier
@@ -252,6 +295,7 @@ fun MacOSDock(
                 .height(70.dp)
                 .wrapContentWidth()
                 .padding(horizontal = 8.dp)
+                .hoverable(dockInteractionSource)
         ) {
             // No background image, just a frosted overlay
             Box(
@@ -265,7 +309,7 @@ fun MacOSDock(
                 modifier = Modifier
                     .fillMaxHeight()
                     .wrapContentWidth()
-                    .padding(horizontal = horizontalPadding),
+                    .padding(start = leftPadding, end = rightPadding),
                 horizontalArrangement = Arrangement.spacedBy(spacing),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -288,7 +332,7 @@ fun MacOSDock(
                             hoveredIndex = hoveredIndex,
                             onHoverChanged = { isHovered ->
                                 hoveredIndex = if (isHovered) index else -1
-                                isDockHovered = isHovered
+                                // Don't reset isDockHovered here - let the dock area handle it
                             }
                         )
                     }

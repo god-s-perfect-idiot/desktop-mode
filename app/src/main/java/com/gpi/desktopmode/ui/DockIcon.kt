@@ -83,9 +83,9 @@ fun DockIcon(
                     Modifier.background(
                         Brush.radialGradient(
                             colors = listOf(
-                                Color.White.copy(alpha = 0.4f),
-                                Color.White.copy(alpha = 0.1f),
-                                Color.White.copy(alpha = 0.15f)
+                                Color.White.copy(alpha = 0.5f),
+                                Color.White.copy(alpha = 0.3f),
+                                Color.White.copy(alpha = 0.45f)
                             )
                         )
                     )
