@@ -9,6 +9,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
 import java.util.*
+import com.gpi.desktopmode.WindowManagerHelper
 
 object RunningAppsManager {
     
@@ -128,11 +129,7 @@ object RunningAppsManager {
                 label = appInfo.loadLabel(packageManager).toString(),
                 icon = appInfo.loadIcon(packageManager),
                 onClick = {
-                    val intent = packageManager.getLaunchIntentForPackage(packageName)
-                    intent?.let {
-                        it.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-                        context.startActivity(it)
-                    }
+                    WindowManagerHelper.launchAppInWindow(context, packageName, appInfo.loadLabel(packageManager).toString())
                 },
                 isRunning = true
             )

@@ -19,6 +19,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.gpi.desktopmode.DockApp
 import com.gpi.desktopmode.RunningAppsManager
+import com.gpi.desktopmode.WindowManagerHelper
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.layout.ContentScale
@@ -61,7 +62,9 @@ fun MacOSDock(
                 } catch (e: Exception) {
                     null
                 },
-                onClick = { /* TODO */ }
+                onClick = { 
+                    WindowManagerHelper.launchAppInWindow(context, "com.android.settings", "Settings")
+                }
             ),
             DockApp(
                 packageName = "com.google.android.calendar",
@@ -71,7 +74,9 @@ fun MacOSDock(
                 } catch (e: Exception) {
                     null
                 },
-                onClick = { /* TODO */ }
+                onClick = { 
+                    WindowManagerHelper.launchAppInWindow(context, "com.google.android.calendar", "Calendar")
+                }
             ),
             DockApp(
                 packageName = "com.android.vending",
@@ -81,7 +86,9 @@ fun MacOSDock(
                 } catch (e: Exception) {
                     null
                 },
-                onClick = { /* TODO */ }
+                onClick = { 
+                    WindowManagerHelper.launchAppInWindow(context, "com.android.vending", "Play Store")
+                }
             ),
             DockApp(
                 packageName = "com.whatsapp",
@@ -91,7 +98,9 @@ fun MacOSDock(
                 } catch (e: Exception) {
                     null
                 },
-                onClick = { /* TODO */ }
+                onClick = { 
+                    WindowManagerHelper.launchAppInWindow(context, "com.whatsapp", "WhatsApp")
+                }
             ),
             DockApp(
                 packageName = "com.google.android.youtube",
@@ -101,7 +110,9 @@ fun MacOSDock(
                 } catch (e: Exception) {
                     null
                 },
-                onClick = { /* TODO */ }
+                onClick = { 
+                    WindowManagerHelper.launchAppInWindow(context, "com.google.android.youtube", "YouTube")
+                }
             ),
             DockApp(
                 packageName = "com.google.android.gm",
@@ -111,7 +122,9 @@ fun MacOSDock(
                 } catch (e: Exception) {
                     null
                 },
-                onClick = { /* TODO */ }
+                onClick = { 
+                    WindowManagerHelper.launchAppInWindow(context, "com.google.android.gm", "Gmail")
+                }
             ),
             DockApp(
                 packageName = "com.spotify.music",
@@ -121,7 +134,9 @@ fun MacOSDock(
                 } catch (e: Exception) {
                     null
                 },
-                onClick = { /* TODO */ }
+                onClick = { 
+                    WindowManagerHelper.launchAppInWindow(context, "com.spotify.music", "Spotify")
+                }
             ),
             DockApp(
                 packageName = "com.netflix.mediaclient",
@@ -131,7 +146,9 @@ fun MacOSDock(
                 } catch (e: Exception) {
                     null
                 },
-                onClick = { /* TODO */ }
+                onClick = { 
+                    WindowManagerHelper.launchAppInWindow(context, "com.netflix.mediaclient", "Netflix")
+                }
             ),
         )
     }

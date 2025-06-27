@@ -54,6 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.gpi.desktopmode.DockApp
 import com.gpi.desktopmode.toBitmap
+import com.gpi.desktopmode.WindowManagerHelper
 import kotlin.math.abs
 
 @Composable
@@ -214,11 +215,7 @@ private fun AppsGrid(searchQuery: String) {
                             label = app.loadLabel(packageManager).toString(),
                             icon = app.loadIcon(packageManager),
                             onClick = { 
-                                val intent = packageManager.getLaunchIntentForPackage(app.packageName)
-                                intent?.let {
-                                    it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                    context.startActivity(it)
-                                }
+                                WindowManagerHelper.launchAppInWindow(context, app.packageName, app.loadLabel(packageManager).toString())
                             }
                         )
                     } catch (e: Exception) {
