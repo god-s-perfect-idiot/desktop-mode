@@ -9,14 +9,11 @@ import androidx.compose.ui.platform.LocalContext
 import com.gpi.desktopmode.PermissionState
 import com.gpi.desktopmode.PermissionManager
 import com.gpi.desktopmode.ui.UsageAccessRequestDialog
-import com.gpi.desktopmode.WindowManagerHelper
-import com.gpi.desktopmode.WindowContainer
 
 @Composable
 fun MacOSDesktopScreen() {
     var isAppDrawerVisible by remember { mutableStateOf(false) }
     val context = LocalContext.current
-    val windowManager = remember { WindowManagerHelper.getWindowManager(context) }
     
     // Check permissions on launch
     LaunchedEffect(Unit) {
@@ -35,23 +32,6 @@ fun MacOSDesktopScreen() {
         ) {
             MacOSTopBar()
         }
-        
-        // Window Container - this will show all open app windows
-        WindowContainer(
-            windowManager = windowManager,
-            onWindowClose = { windowId ->
-                windowManager.removeWindow(windowId)
-            },
-            onWindowMinimize = { windowId ->
-                windowManager.minimizeWindow(windowId)
-            },
-            onWindowMaximize = { windowId ->
-                windowManager.toggleMaximize(windowId)
-            },
-            onWindowDrag = { windowId, deltaX, deltaY ->
-                windowManager.moveWindow(windowId, deltaX, deltaY)
-            }
-        )
         
         // macOS Dock at the bottom
         MacOSDock(
@@ -77,12 +57,13 @@ fun MacOSDesktopScreen() {
                 }
             }
         )
+        
         // Usage Access Permission Dialog
         UsageAccessRequestDialog(
-            isVisible = PermissionState.showUsageAccessDialog,
-            onDismiss = { PermissionState.dismissUsageAccessDialog() },
+            isVisible = PermissionState.showUsageAccessPermissionDialog,
+            onDismiss = { PermissionState.dismissUsageAccessPermissionDialog() },
             onRequestPermission = {
-                PermissionState.dismissUsageAccessDialog()
+                PermissionState.dismissUsageAccessPermissionDialog()
                 PermissionManager.requestUsageAccessPermission(context)
             }
         )

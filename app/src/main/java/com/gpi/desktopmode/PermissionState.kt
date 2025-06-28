@@ -8,7 +8,7 @@ import androidx.compose.runtime.setValue
 object PermissionState {
     var showOverlayPermissionDialog by mutableStateOf(false)
         private set
-    var showUsageAccessDialog by mutableStateOf(false)
+    var showUsageAccessPermissionDialog by mutableStateOf(false)
         private set
     
     fun requestOverlayPermission() {
@@ -20,11 +20,11 @@ object PermissionState {
     }
     
     fun requestUsageAccessPermission() {
-        showUsageAccessDialog = true
+        showUsageAccessPermissionDialog = true
     }
     
-    fun dismissUsageAccessDialog() {
-        showUsageAccessDialog = false
+    fun dismissUsageAccessPermissionDialog() {
+        showUsageAccessPermissionDialog = false
     }
     
     fun checkAndRequestOverlayPermission(context: Context): Boolean {
@@ -49,6 +49,6 @@ object PermissionState {
         val overlay = PermissionManager.hasOverlayPermission(context)
         val usage = PermissionManager.hasUsageAccessPermission(context)
         if (!overlay) showOverlayPermissionDialog = true
-        else if (!usage) showUsageAccessDialog = true
+        else if (!usage) showUsageAccessPermissionDialog = true
     }
 } 

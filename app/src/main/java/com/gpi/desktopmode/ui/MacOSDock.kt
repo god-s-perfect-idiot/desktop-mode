@@ -19,7 +19,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.gpi.desktopmode.DockApp
 import com.gpi.desktopmode.RunningAppsManager
-import com.gpi.desktopmode.WindowManagerHelper
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.layout.ContentScale
@@ -63,7 +62,15 @@ fun MacOSDock(
                     null
                 },
                 onClick = { 
-                    WindowManagerHelper.launchAppInWindow(context, "com.android.settings", "Settings")
+                    try {
+                        val intent = packageManager.getLaunchIntentForPackage("com.android.settings")
+                        if (intent != null) {
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            context.startActivity(intent)
+                        }
+                    } catch (e: Exception) {
+                        // Handle launch error silently
+                    }
                 }
             ),
             DockApp(
@@ -75,7 +82,15 @@ fun MacOSDock(
                     null
                 },
                 onClick = { 
-                    WindowManagerHelper.launchAppInWindow(context, "com.google.android.calendar", "Calendar")
+                    try {
+                        val intent = packageManager.getLaunchIntentForPackage("com.google.android.calendar")
+                        if (intent != null) {
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            context.startActivity(intent)
+                        }
+                    } catch (e: Exception) {
+                        // Handle launch error silently
+                    }
                 }
             ),
             DockApp(
@@ -87,7 +102,15 @@ fun MacOSDock(
                     null
                 },
                 onClick = { 
-                    WindowManagerHelper.launchAppInWindow(context, "com.android.vending", "Play Store")
+                    try {
+                        val intent = packageManager.getLaunchIntentForPackage("com.android.vending")
+                        if (intent != null) {
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            context.startActivity(intent)
+                        }
+                    } catch (e: Exception) {
+                        // Handle launch error silently
+                    }
                 }
             ),
             DockApp(
@@ -99,7 +122,15 @@ fun MacOSDock(
                     null
                 },
                 onClick = { 
-                    WindowManagerHelper.launchAppInWindow(context, "com.whatsapp", "WhatsApp")
+                    try {
+                        val intent = packageManager.getLaunchIntentForPackage("com.whatsapp")
+                        if (intent != null) {
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            context.startActivity(intent)
+                        }
+                    } catch (e: Exception) {
+                        // Handle launch error silently
+                    }
                 }
             ),
             DockApp(
@@ -111,7 +142,15 @@ fun MacOSDock(
                     null
                 },
                 onClick = { 
-                    WindowManagerHelper.launchAppInWindow(context, "com.google.android.youtube", "YouTube")
+                    try {
+                        val intent = packageManager.getLaunchIntentForPackage("com.google.android.youtube")
+                        if (intent != null) {
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            context.startActivity(intent)
+                        }
+                    } catch (e: Exception) {
+                        // Handle launch error silently
+                    }
                 }
             ),
             DockApp(
@@ -123,7 +162,15 @@ fun MacOSDock(
                     null
                 },
                 onClick = { 
-                    WindowManagerHelper.launchAppInWindow(context, "com.google.android.gm", "Gmail")
+                    try {
+                        val intent = packageManager.getLaunchIntentForPackage("com.google.android.gm")
+                        if (intent != null) {
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            context.startActivity(intent)
+                        }
+                    } catch (e: Exception) {
+                        // Handle launch error silently
+                    }
                 }
             ),
             DockApp(
@@ -135,7 +182,15 @@ fun MacOSDock(
                     null
                 },
                 onClick = { 
-                    WindowManagerHelper.launchAppInWindow(context, "com.spotify.music", "Spotify")
+                    try {
+                        val intent = packageManager.getLaunchIntentForPackage("com.spotify.music")
+                        if (intent != null) {
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            context.startActivity(intent)
+                        }
+                    } catch (e: Exception) {
+                        // Handle launch error silently
+                    }
                 }
             ),
             DockApp(
@@ -147,7 +202,15 @@ fun MacOSDock(
                     null
                 },
                 onClick = { 
-                    WindowManagerHelper.launchAppInWindow(context, "com.netflix.mediaclient", "Netflix")
+                    try {
+                        val intent = packageManager.getLaunchIntentForPackage("com.netflix.mediaclient")
+                        if (intent != null) {
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            context.startActivity(intent)
+                        }
+                    } catch (e: Exception) {
+                        // Handle launch error silently
+                    }
                 }
             ),
         )

@@ -54,7 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.gpi.desktopmode.DockApp
 import com.gpi.desktopmode.toBitmap
-import com.gpi.desktopmode.WindowManagerHelper
+import com.gpi.desktopmode.ui.getLocalBackgroundBitmap
 import kotlin.math.abs
 
 @Composable
@@ -215,7 +215,16 @@ private fun AppsGrid(searchQuery: String) {
                             label = app.loadLabel(packageManager).toString(),
                             icon = app.loadIcon(packageManager),
                             onClick = { 
-                                WindowManagerHelper.launchAppInWindow(context, app.packageName, app.loadLabel(packageManager).toString())
+                                // Launch app using simple Intent
+                                try {
+                                    val intent = packageManager.getLaunchIntentForPackage(app.packageName)
+                                    if (intent != null) {
+                                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                        context.startActivity(intent)
+                                    }
+                                } catch (e: Exception) {
+                                    // Handle launch error silently
+                                }
                             }
                         )
                     } catch (e: Exception) {
@@ -237,14 +246,11 @@ private fun AppsGrid(searchQuery: String) {
     
     var currentPage by remember { mutableStateOf(0) }
     val pageCount = (apps.size + appsPerPage - 1) / appsPerPage
-    val pageApps = apps.drop(currentPage * appsPerPage).take(appsPerPage)
     
     // Navigation logic for page indicators
     LaunchedEffect(apps.size, searchQuery) {
         if (currentPage >= pageCount) currentPage = 0
     }
-    
-    val paddedPageApps = pageApps + List(appsPerPage - pageApps.size) { null }
     
     Column(modifier = Modifier.fillMaxSize()) {
         var gestureActive by remember { mutableStateOf(false) }
@@ -271,7 +277,6 @@ private fun AppsGrid(searchQuery: String) {
                 }
             ) { page ->
                 val pageAppsForCurrentPage = apps.drop(page * appsPerPage).take(appsPerPage)
-                val paddedPageAppsForCurrentPage = pageAppsForCurrentPage + List(appsPerPage - pageAppsForCurrentPage.size) { null }
                 
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(columnsPerPage),
@@ -279,12 +284,8 @@ private fun AppsGrid(searchQuery: String) {
                     verticalArrangement = Arrangement.spacedBy(32.dp),
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    items(paddedPageAppsForCurrentPage) { app ->
-                        if (app != null) {
-                            AppGridItem(app = app)
-                        } else {
-                            Spacer(modifier = Modifier.size(94.dp))
-                        }
+                    items(pageAppsForCurrentPage) { app ->
+                        AppGridItem(app = app)
                     }
                 }
             }

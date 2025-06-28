@@ -5,11 +5,11 @@ package com.gpi.desktopmode
 import android.app.ActivityManager
 import android.app.usage.UsageStatsManager
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
 import java.util.*
-import com.gpi.desktopmode.WindowManagerHelper
 
 object RunningAppsManager {
     
@@ -70,7 +70,7 @@ object RunningAppsManager {
                 runningApps.addAll(sortedStats.map { it.packageName }) // Get all apps
                 
                 Log.d("RunningApps", "Found ${runningApps.size} recently used apps: ${runningApps.joinToString()}")
-            } else {
+            
                 // Fallback for older Android versions (deprecated but still works)
                 @Suppress("DEPRECATION")
                 val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
@@ -129,7 +129,15 @@ object RunningAppsManager {
                 label = appInfo.loadLabel(packageManager).toString(),
                 icon = appInfo.loadIcon(packageManager),
                 onClick = {
-                    WindowManagerHelper.launchAppInWindow(context, packageName, appInfo.loadLabel(packageManager).toString())
+                    try {
+                        val intent = packageManager.getLaunchIntentForPackage(packageName)
+                        if (intent != null) {
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            context.startActivity(intent)
+                        }
+                    } catch (e: Exception) {
+                        // Handle launch error silently
+                    }
                 },
                 isRunning = true
             )
